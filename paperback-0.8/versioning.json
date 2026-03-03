@@ -1,0 +1,1 @@
+{"buildTime":"2026-03-03T07:24:28.034Z","sources":[{"id":"MangaFire","name":"MangaFire","author":"Codex","desc":"Extension that pulls manga from MangaFire","website":"https://github.com/openai","contentRating":"EVERYONE","version":"1.0.0","icon":"icon.png","tags":[],"websiteBaseURL":"https://mangafire.to","intents":53}],"builtWith":{"toolchain":"0.8.7","types":"0.8.7"}}

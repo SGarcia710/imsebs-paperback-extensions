@@ -62,8 +62,7 @@ export const MangaFireInfo: SourceInfo = {
     intents:
         SourceIntents.MANGA_CHAPTERS |
         SourceIntents.HOMEPAGE_SECTIONS |
-        SourceIntents.CLOUDFLARE_BYPASS_REQUIRED |
-        SourceIntents.SETTINGS_UI,
+        SourceIntents.CLOUDFLARE_BYPASS_REQUIRED,
     sourceTags: []
 }
 

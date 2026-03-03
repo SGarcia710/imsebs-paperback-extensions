@@ -1,0 +1,32 @@
+name: Remove unused bundles
+on:
+  delete:
+    branches:
+      - '**'
+      - '!main'
+jobs:
+  build:
+    name: Remove unused bundles
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22]
+
+    steps:
+      - name: Checkout gh-pages Branch
+        uses: actions/checkout@v4.1.4
+        with:
+          ref: gh-pages
+
+      - name: Remove bundles
+        run: |
+          BRANCH_NAME=${{ github.event.ref }}
+          echo "Removing bundles for branch: $BRANCH_NAME"
+          rm -rf "$BRANCH_NAME"
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.6.0
+        with:
+          branch: gh-pages
+          folder: .

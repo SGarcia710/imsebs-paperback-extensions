@@ -197,16 +197,43 @@ function toArrayData(responseData: unknown): string {
 // Base64 helpers
 // ---------------------------------------------------------------------------
 
+const B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+
 function safeAtob(str: string): string {
     if (typeof atob === 'function') return atob(str)
     if (typeof Buffer !== 'undefined') return Buffer.from(str, 'base64').toString('binary')
-    throw new Error('No base64 decoder available')
+    // Manual base64 decode for environments without atob/Buffer (e.g. Paperback runtime)
+    let output = ''
+    const input = str.replace(/=+$/, '')
+    for (let i = 0; i < input.length; i += 4) {
+        const a = B64_CHARS.indexOf(input[i]!)
+        const b = B64_CHARS.indexOf(input[i + 1]!)
+        const c = B64_CHARS.indexOf(input[i + 2] ?? '=')
+        const d = B64_CHARS.indexOf(input[i + 3] ?? '=')
+        const bits = (a << 18) | (b << 12) | (c << 6) | d
+        output += String.fromCharCode((bits >> 16) & 0xff)
+        if (input[i + 2] !== undefined) output += String.fromCharCode((bits >> 8) & 0xff)
+        if (input[i + 3] !== undefined) output += String.fromCharCode(bits & 0xff)
+    }
+    return output
 }
 
 function safeBtoa(str: string): string {
     if (typeof btoa === 'function') return btoa(str)
     if (typeof Buffer !== 'undefined') return Buffer.from(str, 'binary').toString('base64')
-    throw new Error('No base64 encoder available')
+    // Manual base64 encode for environments without btoa/Buffer
+    let output = ''
+    for (let i = 0; i < str.length; i += 3) {
+        const a = str.charCodeAt(i)
+        const b = i + 1 < str.length ? str.charCodeAt(i + 1) : 0
+        const c = i + 2 < str.length ? str.charCodeAt(i + 2) : 0
+        const bits = (a << 16) | (b << 8) | c
+        output += B64_CHARS[(bits >> 18) & 0x3f]
+        output += B64_CHARS[(bits >> 12) & 0x3f]
+        output += i + 1 < str.length ? B64_CHARS[(bits >> 6) & 0x3f] : '='
+        output += i + 2 < str.length ? B64_CHARS[bits & 0x3f] : '='
+    }
+    return output
 }
 
 function toBytes(str: string): number[] {

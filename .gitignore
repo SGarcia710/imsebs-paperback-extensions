@@ -3,3 +3,4 @@ lib/
 bundles/
 .DS_Store
 *.log
+tmp/

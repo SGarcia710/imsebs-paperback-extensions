@@ -15041,15 +15041,39 @@ var _Sources = (() => {
     }
     return String(responseData ?? "");
   }
+  var B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
   function safeAtob(str) {
     if (typeof atob === "function") return atob(str);
     if (typeof Buffer !== "undefined") return Buffer.from(str, "base64").toString("binary");
-    throw new Error("No base64 decoder available");
+    let output = "";
+    const input = str.replace(/=+$/, "");
+    for (let i = 0; i < input.length; i += 4) {
+      const a = B64_CHARS.indexOf(input[i]);
+      const b = B64_CHARS.indexOf(input[i + 1]);
+      const c = B64_CHARS.indexOf(input[i + 2] ?? "=");
+      const d = B64_CHARS.indexOf(input[i + 3] ?? "=");
+      const bits = a << 18 | b << 12 | c << 6 | d;
+      output += String.fromCharCode(bits >> 16 & 255);
+      if (input[i + 2] !== void 0) output += String.fromCharCode(bits >> 8 & 255);
+      if (input[i + 3] !== void 0) output += String.fromCharCode(bits & 255);
+    }
+    return output;
   }
   function safeBtoa(str) {
     if (typeof btoa === "function") return btoa(str);
     if (typeof Buffer !== "undefined") return Buffer.from(str, "binary").toString("base64");
-    throw new Error("No base64 encoder available");
+    let output = "";
+    for (let i = 0; i < str.length; i += 3) {
+      const a = str.charCodeAt(i);
+      const b = i + 1 < str.length ? str.charCodeAt(i + 1) : 0;
+      const c = i + 2 < str.length ? str.charCodeAt(i + 2) : 0;
+      const bits = a << 16 | b << 8 | c;
+      output += B64_CHARS[bits >> 18 & 63];
+      output += B64_CHARS[bits >> 12 & 63];
+      output += i + 1 < str.length ? B64_CHARS[bits >> 6 & 63] : "=";
+      output += i + 2 < str.length ? B64_CHARS[bits & 63] : "=";
+    }
+    return output;
   }
   function toBytes(str) {
     return Array.from(str, (char) => char.charCodeAt(0) & 255);
